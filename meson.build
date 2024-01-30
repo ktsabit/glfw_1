@@ -13,9 +13,8 @@ deps = [
     dependency('gobject-2.0'),
     dependency('gee-0.8'),
     dependency('gio-2.0'),
-    dependency('glfw3'),
-    dependency('gl'),
-
+    dependency('sdl2'),
+    dependency('SDL2_gfx'),
 ]
 
 

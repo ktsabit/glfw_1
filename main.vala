@@ -1,45 +1,71 @@
-using GLFW;
-//  using GL;
+using SDL;
+
+// using SDLGraphics;
 
 int main () {
-    bool running = true;
-
-    // Initialize GLFW
-    //  glfwInit ();
-    init ();
-
-    // Open an OpenGL window (you can also try Mode.FULLSCREEN)
-    Window window = new Window (640, 480, "Hello, world!");
-    if (window == null) {
-        terminate();
-        return 1;
-    }
-
-
-    // Main loop
-    while (running) {
-        // OpenGL rendering goes here...
-        //  glClear (GL_COLOR_BUFFER_BIT);
+ 
+    if (init (InitFlag.VIDEO) < 0) {
+        print ("SDL could not initialize! SDL_Error: %s\n", get_error ());
+    } else {
+        //  string driver = Video.get_current_driver ();
+        //  print ("Driver: %s\n", driver);
         
-        //  glBegin (GL_TRIANGLES);
-        //      glVertex3f ( 0.0f, 1.0f, 0.0f);
-        //      glVertex3f (-1.0f,-1.0f, 0.0f);
-        //      glVertex3f ( 1.0f,-1.0f, 0.0f);
-        //  glEnd ();
+        Video.Window window = new Video.Window ("SDL Tutorial", (int)Video.Window.POS_CENTERED, (int)Video.Window.POS_CENTERED, 640, 480, Video.WindowFlags.FULLSCREEN_DESKTOP | Video.WindowFlags.OPENGL  );
+        //  window.
+        if (window == null) {
+            print ("Window could not be created! SDL_Error: %s\n", get_error ());
+        }
+        // SDL.Timer.delay (4000);
+        else {
+            Event e;
+            bool quit = false;
+            
+            SDL.Video.DisplayMode m = { 800, 600, 0, 0 };
+            window.set_display_mode (m);
+            //  window.show ();
+            int a,b;
+            window.get_position (out a, out b);
+            print("Position: %d, %d\n", a, b);
+            float brightness = window.get_brightness ();
+            print("Brightness: %f\n", brightness);
+            window.get_size (out a, out b);
+            print("Size: %d, %d\n", a, b);
+            window.get_gl_drawable_size (out a, out b);
+            print("GL Drawable Size: %d, %d\n", a, b);
+            Video.DisplayMode mode;
+            window.get_display_mode (out mode);
+            print("Display Mode: %d, %d, %d, %d\n", mode.format, mode.w, mode.h, mode.refresh_rate);
+            print("Flags: %l\n", window.get_flags ());
+            //  window.
+            //  window.raise ();
 
-        // Swap front and back rendering buffers
-        //  glfwSwapBuffers ();
-        window.swap_buffers ();
+            Video.GL.Context ctx = Video.GL.get_current_context ();
+            Video.GL.make_current (window, ctx);
 
-        // Check if ESC key was pressed or window was closed
+            Video.Window wincheck = Video.GL.get_current_window ();
+            int display = wincheck.get_display ();
+            int display_o = window.get_display ();
+            print("Display: %d\n", display);
+            print("Display ori: %d\n", display_o);
+            Video.Surface screenSurface = window.get_surface ();
+            screenSurface.fill_rect (null, 0xFFAABB);
+            window.update_surface ();
+            //  window.show ();
 
-        running = window.get_key (Key.ESCAPE) != ButtonState.PRESS;
+            //  SDL.Timer.delay (3000);
+            while (!quit) {
+                while (Event.poll(out e) != 0) {
+                    if (e.type == EventType.QUIT) {
+                        quit = true;
+                    }
+                    if (e.type == EventType.KEYDOWN) {
+                        quit = true;
+                    }
+                }
+            }
+            window.destroy ();
+        }
     }
-
-    // Close window and terminate GLFW
-    //  glfwTerminate ();
-    window.should_close = true;
-
-    // Exit program
-    return 0;
+    quit ();
+    return 1;
 }
