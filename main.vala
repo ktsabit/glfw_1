@@ -8,93 +8,110 @@ class Player {
     public const int DOT_HEIGHT = 20;
     public const int DOT_VEL = 1;
     public bool movedkah = false;
-    int mPosX;
-    int mPosY;
-    int mVelX;
-    int mVelY;
+    int posX;
+    int posY;
+    int velX;
+    int velY;
+    int a;
+    public double vel;
+    double totalTime = 0;
+    double previousTime;
+    int interpX;
+    int interpY;
+    int previousX;
+    int previousY;
 
-    int vx = 100;
-    int vy = 120;
-    double dt = 1;
-    int a = 1;
-    double mVel;
+    
+
 
     public Player() {
-        mPosX = 200;
-        mPosY = 50;
-        mVelX = 0;
-        mVelY = 0;
-        mVelX = vx;
-        mVelY = vy;
-        mVel = Math.sqrt(Math.pow(mVelX, 2) + Math.pow(mVelY, 2));
+        interpX = posX;
+        interpY = posY;
+        posX = 200;
+        posY = 50;
+        velX = 500;
+        velY = 500;
+        a = 1;
+        vel = Math.sqrt(Math.pow(velX, 2) + Math.pow(velY, 2));
+        previousTime = getTime();
     }
 
-    public void handleEvent(Event e) {
-        if (e.type == EventType.KEYDOWN && e.key.repeat == 0) {
-            switch (e.key.keysym.sym) {
-            case Input.Keycode.UP: mVelY -= DOT_VEL; print("UP\n"); break;
-            case Input.Keycode.DOWN: mVelY += DOT_VEL; print("DOWN\n");  break;
-            case Input.Keycode.LEFT: mVelX -= DOT_VEL; print("LEFT\n");  break;
-            case Input.Keycode.RIGHT: mVelX += DOT_VEL; print("RIGHT\n");  break;
-            default: break;
-            }
-        } else if (e.type == EventType.KEYUP && e.key.repeat == 0) {
-            switch (e.key.keysym.sym) {
-            case Input.Keycode.UP: mVelY += DOT_VEL; print("UP\n"); break;
-            case Input.Keycode.DOWN: mVelY -= DOT_VEL; print("DOWN\n");  break;
-            case Input.Keycode.LEFT: mVelX += DOT_VEL; print("LEFT\n");  break;
-            case Input.Keycode.RIGHT: mVelX -= DOT_VEL; print("RIGHT\n");  break;
-            default: break;
-            }
-        }
-    }
-
-    public void move() {
-        mPosX += mVelX;
-        if (mPosX < 0 || mPosX + DOT_WIDTH > 640)mPosX -= mVelX;
-        mPosY += mVelY;
-        if (mPosY < 0 || mPosY + DOT_HEIGHT > 480)mPosY -= mVelY;
+    double dt() {
+        double currentTime = getTime();
+        double deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+        print("ct: %f\npt: %f\n", getTime(), previousTime);
+        print("dt: %f\n", deltaTime);
+        return deltaTime;
     }
 
     public void move2() {
-        
-            mPosX += (int) (mVelX * dt);
-            mPosY += (int) (mVelY * dt);
-            if (mPosX < DOT_HEIGHT) {
-                mVelX = -mVelX;
-                mPosX = 2 * (DOT_HEIGHT - mPosX);
+            previousX = posX;
+            previousY = posY;
+            posX += (int) (velX * dt());
+            posY += (int) (velY * dt());
+            print("posX: %d\nposY: %d\n", posX, velY);
+
+            if (posX < DOT_HEIGHT - 1) {
+                velX = -velX;
+                //  posX = 2 * (DOT_HEIGHT - posX);
             }
-            if (mPosX > 640 - DOT_HEIGHT) {
-                mVelX = -mVelX;
-                mPosX = 2 * (640 - DOT_HEIGHT) - mPosX;
+            if (posX > 640 - DOT_HEIGHT + 1) {
+                velX = -velX;
+                //  posX = 2 * (640 - DOT_HEIGHT) - posX;
             }
-            if (mPosY < DOT_HEIGHT) {
-                mVelY = -mVelY;
-                mPosY = 2 * (DOT_HEIGHT - mPosY);
+            if (posY < DOT_HEIGHT - 1) {
+                velY = -velY;
+                //  posY = 2 * (DOT_HEIGHT - posY);
             }
-            if (mPosY > 480 - DOT_HEIGHT) {
-                mVelY = -mVelY;
-                mPosY = 2 * (480 - DOT_HEIGHT) - mPosY;
+            if (posY > 480 - DOT_HEIGHT + 1) {
+                velY = -velY;
+                //  posY = 2 * (480 - DOT_HEIGHT) - posY;
             }
-            double mVele = Math.sqrt(Math.pow(mVelX, 2) + Math.pow(mVelY, 2));
-            //  if (mVel < )break;
-            if (mVel > 0) mVel -= a * dt;
-            if (mVel < 0) mVel += a * dt;
-            //  if (mVel < dt) return;
-            mVelX = (int)(mVel*(mVelX/mVele));
-            mVelY = (int)(mVel*(mVelY/mVele));
-            print("mVel: %f\na: %f\ndt: %f\n", mVel, a, dt);
-            SDL.Timer.delay(10);
+            double vele = Math.sqrt(Math.pow(velX, 2) + Math.pow(velY, 2));
+            if (vel > 0) vel -= a * dt();
+            if (vel < 0) vel += a * dt();
+            velX = (int)(vel*(velX/vele));
+            velY = (int)(vel*(velY/vele));
+            print("vel: %f\na: %f\ndt: %f\n", vel, a, dt());
     }
 
     public void render(Video.Renderer renderer) {
-        Circle.fill_rgba(renderer, (int16) mPosX, (int16) mPosY, (int16) DOT_WIDTH,
+        Circle.fill_rgba(renderer, (int16) interpX, (int16) interpY, (int16) DOT_WIDTH,
                          0x00, 0x00, 0x00, 0xff);
-        Circle.fill_rgba(renderer, (int16) mPosX, (int16) mPosY, (int16) 9, 0xff, 0xff, 0xff, 0xff);
+        Circle.fill_rgba(renderer, (int16) interpX, (int16) interpY, (int16) 9, 0xff, 0xff, 0xff, 0xff);
     }
+
+    double getTime() {
+        return SDL.Timer.get_performance_counter() / 1000.0;  
+    }
+
+    public void lerp(double alpha) {
+        interpX = (int) (previousX + (posX - previousX) * alpha);
+        interpY = (int) (previousY + (posY - previousY) * alpha);
+    }
+
 }
 
+
+
+    
+
 int main() {
+
+    uint64 lastTime = SDL.Timer.get_performance_counter();
+
+    double getElapsedTime() {
+
+        return SDL.Timer.get_performance_counter();
+
+        //  uint64 currentTime = SDL.Timer.get_performance_counter();
+        //  double elapsed = (currentTime - lastTime) / SDL.Timer.get_performance_frequency ();
+        //  lastTime = currentTime;
+        //  return elapsed;
+      
+    }
+
     if (SDL.init(InitFlag.VIDEO) < 0) {
         print("SDL could not initialize! SDL_Error: %s\n", get_error());
     } else {
@@ -109,60 +126,34 @@ int main() {
             Video.Renderer.create_with_window(w, h, Video.WindowFlags.RESIZABLE | Video.WindowFlags.OPENGL, out window, out renderer);
             Event e;
             bool quit = false;
-            // renderer.set_draw_color (0xaa, 0xff, 0xff, 0xff);
-            // rend
-            ////  renderer.fill_rect (null);
-            // renderer.present ();
 
             Player player = new Player();
             renderer.present();
 
 
-            double timeStep = 0.01; 
-            double currentTime = 0;
             double accumulator = 0;
-            double previousTime = 0;
-
+            const double TIME_STEP = 0.01; 
             while (!quit) {
-                currentTime = SDL.Timer.get_ticks() / 1000;
-                
-                accumulator += currentTime - previousTime;
+
                 while (Event.poll(out e) != 0) {
                     if (e.type == EventType.QUIT) {
                         quit = true;
                     }
                     if (e.type == EventType.KEYDOWN) {
-                        ////  if (e.key.keysym.sym == Input.Keycode.i) {
-                        ////      print("yeah\n");
-                        ////      //  Circle.fill_color (renderer, 640/2-50,  480/2-50, 100, 0xffaacc);
-                        ////      renderer.set_draw_color (0xaa, 0xff, 0xff, 0xff);
-
-                        ////      renderer.fill_rect (null);
-                        ////      Circle.fill_rgba (renderer, 640/2-50,  480/2-50, 100, 0xff, 0xaa, 0xcc, 0xff);
-
-                        ////      //  renderer.clear ();
-                        ////      //  Video.Rect rect =  Video.Rect ();
-                        ////      //  rect.x = 640/2-50;
-                        ////      //  rect.y = 480/2-50;
-                        ////      //  rect.w = 100;
-                        ////      //  rect.h = 100;
-                        ////      //  renderer.set_draw_color (0xff, 0xaa, 0xcc, 0xff);
-                        ////      //  renderer.fill_rect (rect);
-                        ////      //  print("ret: %d\n", ret);
-                        ////      renderer.present ();
-
-                        ////      //  window.update_surface ();
-                        ////  }
                         if (e.key.keysym.sym == Input.Keycode.ESCAPE)quit = true;
                     }
-
-                    player.handleEvent(e);
                 }
-                // player.move ();
-                player.move2();
-                // renderer.set_draw_color (0xaa, 0xff, 0xff, 0xff);
+                accumulator += getElapsedTime();
+                print("elapsed: %f\n", getElapsedTime());
+                print("acc: %f\n", accumulator);
+                print("ts: %f\n", TIME_STEP);
+                if (accumulator >= TIME_STEP) {
+                    accumulator -= TIME_STEP;
+                    player.move2();
+                }
                 renderer.set_draw_color(0x15, 0x58, 0x43, 0xff);
                 renderer.clear();
+                player.lerp(accumulator / TIME_STEP);
                 player.render(renderer);
                 renderer.present();
             }
