@@ -19,6 +19,7 @@ deps = [
     dependency('glfw3'),
 
     dependency('SDL2_gfx'),
+    dependency('SDL2_image'),
 ]
 
 
