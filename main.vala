@@ -12,9 +12,10 @@ class Ball {
     double v;
     double px;
     double py;
+    bool cue;
     Video.Texture texture;
 
-    public Ball(double x, double y, RWops tx, Video.Renderer renderer,double  vx = 0, double vy = 0) {
+    public Ball(double x, double y, RWops tx, Video.Renderer renderer,double  vx = 1, double vy = 1, bool cue = false) {
         r = 17;
         this.x = x;
         this.y = y;
@@ -22,6 +23,7 @@ class Ball {
         this.vx = vx;
         this.vy = vy;
         texture = load_texture_rw(renderer, tx);
+        this.cue = cue;
         v = Math.sqrt(vx * vx + vy * vy);
     }
 
@@ -65,7 +67,6 @@ class Ball {
             vy = -vy * 0.8;
         }
 
-        //  if checkCollision(Ball b)
         foreach (Ball ball in balls) {
             if (checkCollision(ball)) {
                 double dx = x - ball.x;
@@ -95,18 +96,15 @@ class Ball {
     public void render(Video.Renderer renderer, double alpha = 1.0) {
         double ix = lerp(px, x, alpha);
         double iy = lerp(py, y, alpha);
-        //  Circle.fill_rgba(renderer, (int16) ix, (int16) iy, (int16) r,
-        //                   0x00, 0x00, 0x00, 0xff);
-        //  load_texture_rw(renderer, SDL.RWops src, bool freesrc)
-        //  Circle.fill_rgba(renderer, (int16) ix, (int16) iy, (int16) r,
-        //                   0xff, 0xff, 0xff, 0xff);
+
         Video.Rect rect = Video.Rect();
+        int m = cue ? 8 : 0;
         rect.x = (int16) (ix - r);
         rect.y = (int16) (iy - r);
-        rect.w = (uint16) (2 * r);
-        rect.h = (uint16) (2 * r);
+        rect.w = (uint16) (2 * r) -m;
+        rect.h = (uint16) (2 * r) -m;
+
         renderer.copy(texture, null, rect);
-        
     }
 
     double lerp(double a, double b, double f) {
@@ -150,11 +148,11 @@ int main() {
             bool quit = false;
 
             RWops tx = new RWops.from_file("../bb.png", "rb");
-            Ball ball = new Ball(50, 220, tx, renderer);
+            Ball ball = new Ball(50, 220, tx, renderer, 10,0,true);
 
             Gee.List<Ball> balls = new Gee.ArrayList<Ball>();
 
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 5; i++) {
                 double y = rowY(i, 17);
                 foreach (double x in rowXs(i, 17)) {
                     double bx = y + 500;
@@ -177,16 +175,8 @@ int main() {
                         if (e.button.button == Input.MouseButton.LEFT) {
                             ball.vx = (e.button.x - ball.x) * 5;
                             ball.vy = (e.button.y - ball.y) * 5;
-                            //  ball.v = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
                         }
                     }
-                    //  if (e.type == EventType.KEYDOWN) {
-                    //      if (e.key.keysym.sym == Input.Keycode.LEFT) {
-                    //          ball2.vx = (e.button.x - ball2.x) * 5;
-                    //          ball2.vy = (e.button.y - ball2.y) * 5;
-                    //          //  ball.v = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
-                    //      }
-                    //  }
                     if (e.type == EventType.QUIT) {
                         quit = true;
                     }
@@ -211,26 +201,17 @@ int main() {
                         bb.remove(b);
                         b.move(tick_rate, bb);
                     }
-                    //  ball2.move(tick_rate, {ball});
                     accumulator -= tick_rate;
                 }
-
-
-
-                //  double timeStep = SDL.Timer.get_ticks() / 10000.0;
-                //  ball.move(timeStep);
 
                 renderer.set_draw_color(0x15, 0x58, 0x43, 0xff);
                 renderer.clear();
 
-                //  ball.render(renderer);
                 double alpha = accumulator / tick_rate;
                 ball.render(renderer, alpha);
                 foreach (Ball b in balls) {
                     b.render(renderer, alpha);
                 }
-                //  ball2.render(renderer, alpha);
-
 
                 renderer.present();
             }
